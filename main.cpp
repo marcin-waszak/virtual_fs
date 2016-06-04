@@ -54,8 +54,13 @@ int cmdparser(int argc, char **argv) {
 	char	o_localfile[128] = "";
 	char	o_virtualfile[128] = "";
 
-	if(argc > 1)
-		s_command = argv[1];
+	if(argc < 2) {
+		print_cmderr(nullptr);
+		print_manual();
+		return 0;
+	}
+	
+	s_command = argv[1];
 
 	// Parse command
 	
@@ -169,7 +174,10 @@ int optparser(int argc, char **argv, option* long_options, size_t* o_size,
 }
 
 int print_cmderr(char* cmd) {
-	printf("Incorrect command \"%s\". ", cmd);
+	if(cmd)
+		printf("Incorrect command \"%s\". ", cmd);
+	else
+		printf("Incorrect command. ");
 	return 0;
 }
 
