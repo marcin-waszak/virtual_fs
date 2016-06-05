@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include <cstdio>
 #include <getopt.h>
+#include <unistd.h>
+
+#include "FileSystem.hpp"
 
 int cmdparser(int argc, char **argv);
 int optparser(int argc, char **argv, option* long_options, size_t* o_size,
@@ -9,8 +12,9 @@ int optparser(int argc, char **argv, option* long_options, size_t* o_size,
 int print_manual();
 int print_cmderr(char* cmd);
 
-int main(int argc, char **argv) {
+bool fileExist(char* fname);
 
+int main(int argc, char **argv) {
 	cmdparser(argc, argv);
 	return 0;
 }
@@ -68,8 +72,13 @@ int cmdparser(int argc, char **argv) {
 		optparser(argc, argv, create_options, &o_size, o_filesystem,
 			o_localfile, o_virtualfile);
 
-		printf("Size: %zu\n", o_size);
-		printf("Filesystem path: %s\n", o_filesystem);
+		if(fileExist(o_filesystem)) {
+			printf("File %s already exists.\n", o_filesystem);
+			return 0;
+		}
+
+		if(FileSystem::create(o_filesystem, o_size))
+			printf("Cannot create the filesystem with following arguments.\n");
 	}
 	else if(strcmp(s_command, "import") == 0) {
 		optparser(argc, argv, import_options, &o_size, o_filesystem,
@@ -91,7 +100,11 @@ int cmdparser(int argc, char **argv) {
 		optparser(argc, argv, details_options, &o_size, o_filesystem,
 			o_localfile, o_virtualfile);
 
-		printf("Filesystem path: %s\n", o_filesystem);
+		FileSystem fs(o_filesystem);
+
+//		size_t free_space = fs.freeSpace();
+
+//		printf("Free space: %zu\n", free_space);
 	}
 	else if(strcmp(s_command, "remove") == 0) {
 		optparser(argc, argv, remove_options, &o_size, o_filesystem,
@@ -149,7 +162,6 @@ int optparser(int argc, char **argv, option* long_options, size_t* o_size,
 
 		case ':':
 		case '?':
-			print_manual();
 			break;
 
 		case -1:
@@ -159,7 +171,7 @@ int optparser(int argc, char **argv, option* long_options, size_t* o_size,
 		}
 	}
 
-	/* Print any remaining command line arguments (not options). */
+	// Print any remaining command line arguments (not options).
 	if (optind < argc)
 	{
 		printf("Non-option arguments: ");
@@ -184,4 +196,8 @@ int print_cmderr(char* cmd) {
 int print_manual() {
 	printf("Syntax:\n fs [command] [options]\n");
 	return 0;
+}
+
+bool fileExist(char* fname) {
+	return access(fname, F_OK) != -1;
 }
