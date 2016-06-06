@@ -73,7 +73,7 @@ int cmdparser(int argc, char **argv) {
 			o_localfile, o_virtualfile);
 
 		if(fileExist(o_filesystem)) {
-			printf("File %s already exists.\n", o_filesystem);
+			printf("Filesystem %s already exists.\n", o_filesystem);
 			return 0;
 		}
 
@@ -84,9 +84,10 @@ int cmdparser(int argc, char **argv) {
 		optparser(argc, argv, import_options, &o_size, o_filesystem,
 			o_localfile, o_virtualfile);
 
-		printf("Filesystem path: %s\n", o_filesystem);
-		printf("Local file path: %s\n", o_localfile);
-		printf("Virtual file path: %s\n", o_virtualfile);
+		FileSystem fs(o_filesystem);
+		if(fs.import(o_localfile, o_virtualfile))
+			printf("Cannot import %s file as %s into %s filesystem.\n",
+				o_localfile, o_virtualfile, o_filesystem);
 	}
 	else if(strcmp(s_command, "export") == 0) {
 		optparser(argc, argv, export_options, &o_size, o_filesystem,
@@ -101,10 +102,14 @@ int cmdparser(int argc, char **argv) {
 			o_localfile, o_virtualfile);
 
 		FileSystem fs(o_filesystem);
+//		fs.fileFind(nullptr);
 
 //		size_t free_space = fs.freeSpace();
 
 //		printf("Free space: %zu\n", free_space);
+
+		for(auto &i : fs.map_space)
+			cout << i.first << " : " << i.second << endl;
 	}
 	else if(strcmp(s_command, "remove") == 0) {
 		optparser(argc, argv, remove_options, &o_size, o_filesystem,

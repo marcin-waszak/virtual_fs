@@ -2,6 +2,7 @@
 #define FILESYSTEM_HPP
 
 #include <fstream>
+#include <map>
 #include <cstring>
 #include <iostream>//
 
@@ -31,18 +32,28 @@ private:
 
 	fstream fs_file;
 	fsdesc_t fs_desc;
-
 public:
+	map<size_t, size_t> map_space;
+
 	FileSystem(char* fs_path);
 
-	static int create(char* fs_path, size_t size);
+	int import(char* f_local, char* f_virtual);
 	size_t freeSpace();
+	size_t fileFind(char* fname);
+	static bool checkIntersect(size_t start, size_t end, size_t position);
+	static size_t fend();
+	static int create(char* fs_path, size_t size);
+	static size_t localFileSize(fstream& file);
 
 private:
 	bool descriptorGood();
 	int writeDescriptor();
 	int readDescriptor();
 	int initSpace(size_t size);
+	size_t descriptorsEnd();
+	size_t findSpace(size_t space);
+	bool checkBordersInInterval(size_t start, size_t end);
+	int loadFileMap();
 };
 
 #endif
